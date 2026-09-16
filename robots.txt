@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jkotosmos.github.io/tea/sitemap.xml
