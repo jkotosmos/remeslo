@@ -1,0 +1,16 @@
+{
+  // Статический сайт на Cloudflare Workers. Скрипта-воркера нет —
+  // Cloudflare просто раздаёт содержимое public/ как есть.
+  //
+  // Команда развёртывания в настройках проекта: npx wrangler deploy
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "remeslo",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./public",
+    // Адреса без завершающего слэша приводятся к каноничному виду,
+    // на несуществующий путь отдаётся 404, а не главная страница.
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  }
+}

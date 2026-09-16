@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Когда домен будет известен, добавьте сюда:
+# Sitemap: https://ДОМЕН/sitemap.xml
