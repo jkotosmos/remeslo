@@ -295,17 +295,42 @@ a { color: inherit; }
 }
 .sec-cover .wrap { width: 100%; }
 
+/* Имя и портрет стоят в одной строке и садятся на общую нижнюю линию:
+   имя прижато к низу кадра, кадр задаёт высоту блока. */
+.cover-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(150px, 26%, 300px);
+  gap: clamp(20px, 3.5vw, 52px);
+  align-items: end;
+  margin-top: clamp(20px, 4vh, 40px);
+}
+
 .name {
-  font-size: clamp(3.2rem, 13.2vw, 11.5rem);
+  font-size: clamp(3rem, 10vw, 9.5rem);
   line-height: .84;
   letter-spacing: -.045em;
   font-weight: 600;
-  margin-top: clamp(20px, 4vh, 40px);
   display: flex; flex-direction: column;
 }
 .name span { display: block; }
 .name span:last-child { padding-left: .09em; }
-@media (max-width: 680px) { .name { font-size: clamp(3.2rem, 17vw, 5rem); letter-spacing: -.035em; } }
+
+.portrait { margin: 0; }
+.portrait img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--rule);
+  /* Документальная подача: обесцвечено, как и просили в брифе про портреты.
+     Убрать цвет обратно — снять filter, файл лежит цветным. */
+  filter: grayscale(1) contrast(1.05);
+}
+
+/* На узком экране рядом уже не помещаются — кадр уходит под имя,
+   но остаётся небольшим, чтобы не съедать первый экран. */
+@media (max-width: 720px) {
+  .cover-top { grid-template-columns: 1fr; gap: clamp(18px, 3vh, 28px); }
+  .name { font-size: clamp(3.2rem, 17vw, 5rem); letter-spacing: -.035em; }
+  .portrait { max-width: 190px; }
+}
 
 .cover-grid {
   display: grid;
