@@ -1,0 +1,755 @@
+/* ==========================================================================
+   Нарек Погосян — личный сайт
+   Визуальная идея: лист рабочей документации. Рамка, штамп, координатная
+   сетка, ведомости и тонкие линии. Никаких теней, скруглений и градиентов —
+   только типографика, линейки и воздух.
+   ========================================================================== */
+
+/* --- 1. Токены ----------------------------------------------------------- */
+
+:root {
+  --paper:      #f4f1ea;
+  --paper-2:    #eae6dd;
+  --ink:        #17140f;
+  --ink-2:      #5a544a;
+  --ink-3:      #6f6a60;
+  --faint:      rgba(23, 20, 15, .3);
+  --accent:     #a4441c;
+  --rule:       rgba(23, 20, 15, .18);
+  --rule-soft:  rgba(23, 20, 15, .085);
+  --grid:       rgba(23, 20, 15, .04);
+
+  /* место под штамп у правого края листа */
+  --stamp-w: 250px;
+  --stamp-reserve: 0px;
+
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, "Courier New", monospace;
+  --serif: "PT Serif", Georgia, "Times New Roman", serif;
+
+  --gut: clamp(20px, 5vw, 76px);   /* поле листа */
+  --maxw: 1500px;
+  --rail: 0px;                     /* ширина корешка, включается на ≥1180px */
+}
+
+:root[data-theme="dark"] {
+  --paper:      #121110;
+  --paper-2:    #1a1917;
+  --ink:        #efeae0;
+  --ink-2:      #a09a8f;
+  --ink-3:      #8b857a;
+  --faint:      rgba(239, 234, 224, .32);
+  --accent:     #d2703f;
+  --rule:       rgba(239, 234, 224, .2);
+  --rule-soft:  rgba(239, 234, 224, .085);
+  --grid:       rgba(239, 234, 224, .045);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #121110;
+    --paper-2:    #1a1917;
+    --ink:        #efeae0;
+    --ink-2:      #a09a8f;
+    --ink-3:      #8b857a;
+    --faint:      rgba(239, 234, 224, .32);
+    --accent:     #d2703f;
+    --rule:       rgba(239, 234, 224, .2);
+    --rule-soft:  rgba(239, 234, 224, .085);
+    --grid:       rgba(239, 234, 224, .045);
+  }
+}
+
+/* --- 2. Сброс и база ----------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1rem, .96rem + .28vw, 1.1875rem);
+  line-height: 1.62;
+  overflow-x: hidden;
+  /* Миллиметровка: два тончайших семейства линий. */
+  background-image:
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 100%);
+  background-size: 112px 112px, 112px 112px;
+  background-position: center top;
+  padding-bottom: 58px;   /* запас под штамп-полосу на узких экранах */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+
+h1, h2, h3 { font-family: var(--sans); font-weight: 600; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+
+.skip {
+  position: fixed; top: -100px; left: 0; z-index: 99;
+  background: var(--ink); color: var(--paper);
+  padding: .7rem 1.1rem; font-family: var(--mono); font-size: .75rem;
+  text-decoration: none;
+}
+.skip:focus { top: 0; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.vis-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* --- 3. Рамка листа ------------------------------------------------------ */
+
+.sheet-frame {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+}
+.sf-border {
+  position: absolute;
+  inset: clamp(9px, 1.4vw, 18px);
+  border: 1px solid var(--rule);
+}
+.sf-corner {
+  position: absolute; width: 13px; height: 13px;
+  border: 0 solid var(--accent);
+}
+.sf-corner.tl { top: clamp(9px,1.4vw,18px); left: clamp(9px,1.4vw,18px); border-top-width: 2px; border-left-width: 2px; }
+.sf-corner.tr { top: clamp(9px,1.4vw,18px); right: clamp(9px,1.4vw,18px); border-top-width: 2px; border-right-width: 2px; }
+.sf-corner.bl { bottom: clamp(9px,1.4vw,18px); left: clamp(9px,1.4vw,18px); border-bottom-width: 2px; border-left-width: 2px; }
+.sf-corner.br { bottom: clamp(9px,1.4vw,18px); right: clamp(9px,1.4vw,18px); border-bottom-width: 2px; border-right-width: 2px; }
+
+.sf-coords {
+  position: absolute; display: flex;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .14em;
+  color: var(--faint); font-style: normal;
+}
+.sf-coords i { font-style: normal; }
+.sf-cols {
+  top: calc(clamp(9px,1.4vw,18px) + 5px);
+  left: 8%; right: 8%;
+  justify-content: space-between;
+}
+.sf-rows {
+  left: calc(clamp(9px,1.4vw,18px) + 5px);
+  top: 16%; bottom: 16%;
+  flex-direction: column; justify-content: space-between;
+}
+@media (max-width: 720px) { .sf-coords { display: none; } }
+@media (min-width: 1180px) { .sf-rows { display: none; } }   /* место занял корешок */
+
+/* --- 4. Корешок с номерами листов ---------------------------------------- */
+
+.rail { display: none; }
+
+@media (min-width: 1180px) {
+  :root { --rail: 84px; }
+  .rail {
+    display: block;
+    position: fixed; z-index: 6;
+    left: clamp(9px,1.4vw,18px); top: 50%; transform: translateY(-50%);
+    padding-left: 14px;
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; }
+  .rail li + li { margin-top: 3px; }
+  .rail a {
+    display: flex; align-items: center; gap: 9px;
+    text-decoration: none; padding: 3px 0;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    color: var(--ink-3);
+    transition: color .18s;
+  }
+  .rail a::before {
+    content: ""; display: block; width: 10px; height: 1px;
+    background: currentColor; flex: none;
+    transition: width .22s cubic-bezier(.2,.7,.3,1);
+  }
+  .rail a b { font-weight: 400; }
+  .rail a span {
+    max-width: 0; overflow: hidden; white-space: nowrap;
+    opacity: 0; text-transform: lowercase;
+    transition: max-width .26s cubic-bezier(.2,.7,.3,1), opacity .2s;
+  }
+  .rail a:hover, .rail a:focus-visible { color: var(--ink); }
+  .rail a:hover::before, .rail a:focus-visible::before { width: 20px; }
+  .rail a:hover span, .rail a:focus-visible span { max-width: 150px; opacity: 1; }
+  .rail a.on { color: var(--accent); }
+  .rail a.on::before { width: 26px; height: 2px; }
+  .rail a.on span { max-width: 150px; opacity: 1; }
+}
+
+/* --- 5. Штамп ------------------------------------------------------------ */
+
+/* На узких экранах штамп — полоса по низу листа. На широких он уезжает
+   в правый нижний угол, как на настоящем чертеже, а колонка текста
+   заранее отступает от него (--stamp-reserve), чтобы ничего не перекрыть. */
+
+.stamp {
+  position: fixed; z-index: 7;
+  left: calc(clamp(9px, 1.4vw, 18px) + 1px);
+  right: calc(clamp(9px, 1.4vw, 18px) + 1px);
+  bottom: calc(clamp(9px, 1.4vw, 18px) + 1px);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+}
+.st-row { display: flex; align-items: stretch; }
+.st-name { display: none; flex-direction: column; padding: 7px 11px 8px; border-bottom: 1px solid var(--rule); }
+.st-who { font-size: 12px; letter-spacing: .02em; color: var(--ink); }
+.st-role { font-size: 9.5px; letter-spacing: .09em; color: var(--ink-3); margin-top: 2px; }
+.st-meta > * { padding: 7px 10px; font-size: 9.5px; letter-spacing: .09em; color: var(--ink-2); }
+.st-sheet { border-right: 1px solid var(--rule); flex: none; }
+.st-sheet b { color: var(--accent); font-weight: 500; }
+.st-title { flex: 1 1 auto; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-theme {
+  flex: none; border: 0; border-left: 1px solid var(--rule);
+  background: transparent; color: var(--ink-2); cursor: pointer;
+  font: inherit; font-size: 9.5px; letter-spacing: .09em;
+  text-transform: lowercase;
+}
+.st-theme:hover { color: var(--accent); }
+
+@media (min-width: 1061px) {
+  :root { --stamp-reserve: var(--stamp-w); }
+  .stamp { left: auto; width: var(--stamp-w); }
+  .st-name { display: flex; }
+}
+
+/* --- 6. Сетка страницы --------------------------------------------------- */
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-left: calc(var(--gut) + var(--rail));
+  padding-right: calc(var(--gut) + var(--stamp-reserve));
+}
+
+.sec { padding-block: clamp(76px, 12vh, 150px); position: relative; }
+.sec + .sec::before {
+  content: ""; position: absolute; top: 0;
+  left: clamp(9px, 1.4vw, 18px); right: clamp(9px, 1.4vw, 18px);
+  height: 1px; background: var(--rule);
+}
+.sec-last { padding-bottom: clamp(120px, 18vh, 220px); }
+
+/* --- 7. Технические подписи ---------------------------------------------- */
+
+.tag {
+  font-family: var(--mono); font-size: 10px; font-weight: 400;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0;
+}
+.tag-inline {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--ink-2); margin-bottom: 18px;
+}
+.tag-inline::after {
+  content: ""; flex: 1 1 auto; height: 1px; background: var(--rule);
+}
+.mt { margin-top: clamp(40px, 6vh, 64px); }
+
+/* Размерная линия, как на чертеже: |<--- текст --->| */
+.dim {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 14px;
+  margin: clamp(26px, 4vh, 44px) 0;
+}
+/* концевые засечки */
+.dim::before, .dim::after {
+  content: ""; flex: 1 1 auto; height: 9px;
+}
+.dim::before { border-left: 1px solid var(--rule); }
+.dim::after  { border-right: 1px solid var(--rule); }
+/* выносные линии слева и справа от подписи */
+.dim > span {
+  position: relative; flex: none; white-space: nowrap;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.dim > span::before, .dim > span::after {
+  content: ""; position: absolute; top: 50%;
+  width: 100vw; height: 1px; background: var(--rule);
+}
+.dim > span::before { right: calc(100% + 14px); }
+.dim > span::after  { left: calc(100% + 14px); }
+
+/* --- 8. Лист 01 — обложка ------------------------------------------------ */
+
+.sec-cover {
+  min-height: 100svh;
+  display: flex; align-items: center;
+  padding-top: clamp(80px, 14vh, 150px);
+  padding-bottom: clamp(70px, 10vh, 120px);
+  cursor: crosshair;
+}
+.sec-cover .wrap { width: 100%; }
+
+/* Имя и портрет стоят в одной строке и садятся на общую нижнюю линию:
+   имя прижато к низу кадра, кадр задаёт высоту блока. */
+.cover-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(150px, 26%, 300px);
+  gap: clamp(20px, 3.5vw, 52px);
+  align-items: end;
+  margin-top: clamp(20px, 4vh, 40px);
+}
+
+.name {
+  font-size: clamp(3rem, 10vw, 9.5rem);
+  line-height: .84;
+  letter-spacing: -.045em;
+  font-weight: 600;
+  display: flex; flex-direction: column;
+}
+.name span { display: block; }
+.name span:last-child { padding-left: .09em; }
+
+.portrait { margin: 0; }
+.portrait img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--rule);
+  /* Документальная подача: обесцвечено, как и просили в брифе про портреты.
+     Убрать цвет обратно — снять filter, файл лежит цветным. */
+  filter: grayscale(1) contrast(1.05);
+}
+
+/* На узком экране рядом уже не помещаются — кадр уходит под имя,
+   но остаётся небольшим, чтобы не съедать первый экран. */
+@media (max-width: 720px) {
+  .cover-top { grid-template-columns: 1fr; gap: clamp(18px, 3vh, 28px); }
+  .name { font-size: clamp(3.2rem, 17vw, 5rem); letter-spacing: -.035em; }
+  .portrait { max-width: 190px; }
+}
+
+.cover-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+.lede {
+  font-size: clamp(1.0625rem, 1rem + .5vw, 1.4375rem);
+  line-height: 1.5; max-width: 33ch;
+}
+.lede-note {
+  font-family: var(--mono); font-size: .8125rem; line-height: 1.75;
+  color: var(--ink-2); letter-spacing: .01em;
+  border-left: 2px solid var(--accent); padding-left: 16px;
+}
+
+.facts {
+  margin: clamp(40px, 7vh, 80px) 0 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+}
+.facts > div {
+  padding: 18px 20px 20px 0;
+  border-right: 1px solid var(--rule-soft);
+}
+.facts > div:last-child { border-right: 0; }
+.facts > div + div { padding-left: 20px; }
+.facts dt {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px;
+}
+.facts dd {
+  margin: 0; font-family: var(--sans); color: var(--ink);
+  display: flex; align-items: baseline; gap: .18em; flex-wrap: wrap;
+}
+.facts dd b {
+  font-size: clamp(2.6rem, 6.5vw, 4.4rem); font-weight: 500;
+  letter-spacing: -.04em; line-height: .9;
+  font-variant-numeric: tabular-nums;
+}
+.facts dd i {
+  font-style: normal; font-family: var(--mono); font-size: .9375rem;
+  color: var(--ink-2); letter-spacing: .02em;
+}
+
+@media (max-width: 860px) {
+  .cover-grid { grid-template-columns: 1fr; }
+  .lede-note { border-left: 0; border-top: 2px solid var(--accent); padding-left: 0; padding-top: 14px; }
+  .facts { grid-template-columns: 1fr; margin-top: clamp(28px, 4vh, 44px); }
+  .facts > div { border-right: 0; border-bottom: 1px solid var(--rule-soft); padding: 12px 0 14px; }
+  .facts > div:last-child { border-bottom: 0; }
+  .facts dt { margin-bottom: 6px; }
+  .facts dd { align-items: baseline; }
+}
+
+/* --- 9. Заголовки разделов ----------------------------------------------- */
+
+.sec-head { margin-bottom: clamp(36px, 6vh, 68px); }
+.sec-head h2 {
+  font-size: clamp(2.1rem, 6vw, 4.4rem);
+  line-height: .95; letter-spacing: -.035em; font-weight: 500;
+  margin-top: 14px;
+}
+.sec-sub {
+  font-family: var(--mono); font-size: .8125rem; color: var(--ink-2);
+  margin-top: 18px; max-width: 46ch; line-height: 1.7;
+}
+
+/* --- 10. Две колонки ----------------------------------------------------- */
+
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 250px) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: start;
+}
+.col-side { border-top: 1px solid var(--rule); padding-top: 18px; }
+.side-label {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+.side-note {
+  font-family: var(--sans); font-size: .875rem; line-height: 1.62;
+  color: var(--ink-2); margin-bottom: 26px;
+}
+.side-note:last-child { margin-bottom: 0; }
+
+.prose-lead {
+  font-size: clamp(1.125rem, 1.05rem + .5vw, 1.5rem);
+  line-height: 1.48; letter-spacing: -.005em;
+  max-width: 34ch;
+}
+.prose { margin-top: 1.35em; max-width: 60ch; color: var(--ink-2); }
+.prose:first-of-type { margin-top: 1.6em; }
+
+@media (max-width: 860px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+/* Портрет или кадр с объекта. Разметка лежит закомментированной в index.html. */
+.shot { margin: clamp(36px, 6vh, 60px) 0 0; }
+.shot img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--rule); filter: grayscale(1) contrast(1.04);
+}
+.shot figcaption {
+  margin-top: 10px; font-family: var(--mono); font-size: .6875rem;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+}
+
+/* --- 11. Формула --------------------------------------------------------- */
+
+.formula {
+  margin: clamp(44px, 7vh, 76px) 0 0;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule);
+  padding: 22px 0 18px;
+}
+.fx {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .55em;
+  font-family: var(--sans); font-weight: 500;
+  font-size: clamp(1.25rem, 3.6vw, 2.4rem);
+  letter-spacing: -.03em; line-height: 1.1;
+}
+.fx em { font-style: normal; color: var(--accent); font-weight: 400; }
+.formula figcaption {
+  margin-top: 16px; font-family: var(--mono); font-size: .75rem;
+  line-height: 1.75; color: var(--ink-2); max-width: 54ch;
+}
+
+/* --- 12. Ведомость ------------------------------------------------------- */
+
+.ved {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--sans); font-size: .9375rem;
+}
+.ved caption { text-align: left; }
+.ved th {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 400;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3);
+  text-align: left; padding: 0 14px 10px 0;
+  border-bottom: 1px solid var(--ink);
+}
+.ved td {
+  padding: 15px 14px 15px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: baseline;
+}
+.ved tr:last-child td { border-bottom: 1px solid var(--rule); }
+.ved .c-pos { width: 3.5rem; font-family: var(--mono); font-size: .75rem; color: var(--ink-3); }
+.ved .c-val {
+  font-family: var(--mono); font-weight: 500; color: var(--accent);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.ved .c-note { color: var(--ink-3); font-size: .8125rem; width: 34%; }
+.ved tbody tr { transition: background .15s; }
+.ved tbody tr:hover { background: var(--paper-2); }
+
+@media (max-width: 760px) {
+  .ved, .ved tbody, .ved tr, .ved td { display: block; width: auto; }
+  .ved thead { display: none; }
+  .ved tr { border-bottom: 1px solid var(--rule-soft); padding: 14px 0; position: relative; }
+  .ved tr:last-child { border-bottom: 1px solid var(--rule); }
+  .ved td { border: 0; padding: 0; }
+  .ved .c-pos { position: absolute; right: 0; top: 14px; }
+  .ved .c-val { font-size: 1.125rem; margin: 6px 0 4px; }
+  .ved .c-note { width: auto; }
+}
+
+/* --- 13. Бегущая строка заказчиков --------------------------------------- */
+
+.ticker { margin-top: clamp(48px, 7vh, 80px); }
+.tick-view { overflow: hidden; border-block: 1px solid var(--rule); padding: 14px 0; }
+.tick-row {
+  display: flex; gap: 0; width: max-content;
+  animation: tick 46s linear infinite;
+}
+.tick-row span {
+  font-family: var(--mono); font-size: .8125rem; letter-spacing: .04em;
+  color: var(--ink-2); padding: 0 22px;
+  border-right: 1px solid var(--rule-soft); white-space: nowrap;
+}
+@keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .tick-row { animation: none; width: auto; flex-wrap: wrap; row-gap: 8px; }
+  .tick-row span[aria-hidden] { display: none; }
+}
+
+/* --- 14. Лестница шагов -------------------------------------------------- */
+
+.steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.steps li {
+  display: grid; grid-template-columns: 4.2rem 1fr;
+  align-items: baseline; gap: 4px;
+  padding: 13px 0; border-bottom: 1px solid var(--rule-soft);
+  position: relative;
+}
+.steps li b {
+  font-family: var(--mono); font-size: .75rem; font-weight: 400;
+  color: var(--ink-3); letter-spacing: .1em;
+}
+.steps li span { font-family: var(--sans); font-size: .9375rem; line-height: 1.5; }
+.steps li::before {
+  content: ""; position: absolute; left: 2.1rem; top: 0; bottom: 0;
+  width: 1px; background: var(--rule);
+}
+.steps li:first-child::before { top: 50%; }
+.steps li:last-child::before { bottom: 50%; }
+.steps li::after {
+  content: ""; position: absolute; left: calc(2.1rem - 2px); top: calc(50% - 2px);
+  width: 5px; height: 5px; background: var(--paper);
+  border: 1px solid var(--accent);
+}
+.steps-note {
+  margin-top: 20px; font-family: var(--mono); font-size: .75rem;
+  line-height: 1.8; color: var(--ink-2); max-width: 56ch;
+}
+
+/* --- 15. Противопоставление ---------------------------------------------- */
+
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--rule); }
+.vs-col { padding: 20px 22px 24px 0; font-family: var(--sans); font-size: .875rem; line-height: 1.6; color: var(--ink-2); }
+.vs-col + .vs-col { border-left: 1px solid var(--rule-soft); padding-left: 22px; padding-right: 0; }
+.vs-h {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.vs-plus .vs-h { color: var(--accent); }
+.vs-minus .vs-h { color: var(--ink-3); }
+@media (max-width: 680px) {
+  .vs { grid-template-columns: 1fr; }
+  .vs-col + .vs-col { border-left: 0; border-top: 1px solid var(--rule-soft); padding-left: 0; padding-top: 20px; }
+}
+
+/* --- 16. Реестр объектов ------------------------------------------------- */
+
+.reg { border-top: 1px solid var(--ink); }
+.reg-head, .reg-row > summary {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 2.3fr) minmax(0, .95fr) minmax(0, .95fr) minmax(0, 1.05fr);
+  gap: 16px; align-items: baseline;
+}
+.reg-head {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding: 10px 0; border-bottom: 1px solid var(--rule);
+}
+.reg-row { border-bottom: 1px solid var(--rule-soft); }
+.reg-row:last-child { border-bottom: 1px solid var(--rule); }
+.reg-row > summary {
+  padding: 16px 0; cursor: pointer; list-style: none;
+  transition: background .15s;
+}
+.reg-row > summary::-webkit-details-marker { display: none; }
+.reg-row > summary:hover { background: var(--paper-2); }
+.reg-row .r-n { font-family: var(--mono); font-size: .75rem; color: var(--ink-3); position: relative; }
+.reg-row .r-n::after {
+  content: "+"; position: absolute; right: 0; top: 0; color: var(--accent);
+}
+.reg-row[open] .r-n::after { content: "−"; }
+.reg-row .r-o { font-family: var(--sans); font-size: 1rem; font-weight: 500; letter-spacing: -.01em; }
+.reg-row .r-p, .reg-row .r-t {
+  font-family: var(--mono); font-size: .75rem; color: var(--ink-2);
+}
+.reg-row .r-s {
+  font-family: var(--mono); font-size: .8125rem; color: var(--accent);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.reg-body { padding: 0 0 20px calc(3.2rem + 16px); }
+.reg-body p {
+  font-family: var(--sans); font-size: .875rem; line-height: 1.65;
+  color: var(--ink-2); max-width: 62ch;
+}
+
+@media (max-width: 860px) {
+  .reg-head { display: none; }
+  .reg-row .is-empty { display: none; }   /* прочерк без заголовка колонки — шум */
+  .reg-row > summary {
+    grid-template-columns: 2.6rem 1fr auto;
+    grid-template-areas: "n o o" ". p s" ". t t";
+    row-gap: 5px;
+  }
+  .reg-row .r-n { grid-area: n; }
+  .reg-row .r-o { grid-area: o; }
+  .reg-row .r-p { grid-area: p; }
+  .reg-row .r-t { grid-area: t; }
+  .reg-row .r-s { grid-area: s; text-align: right; }
+  .reg-body { padding-left: 2.6rem; }
+}
+
+/* --- 17. Ячейки экспертизы ----------------------------------------------- */
+
+.cells {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--ink); border-left: 1px solid var(--rule-soft);
+}
+.cell {
+  padding: 26px 28px 32px;
+  border-right: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.cell-n {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+  color: var(--accent); margin-bottom: 14px;
+}
+.cell h3 {
+  font-size: clamp(1.125rem, 2.2vw, 1.5rem); font-weight: 500;
+  letter-spacing: -.02em; margin-bottom: 12px;
+}
+.cell p:last-child {
+  font-family: var(--sans); font-size: .875rem; line-height: 1.6;
+  color: var(--ink-2);
+}
+@media (max-width: 720px) {
+  .cells { grid-template-columns: 1fr; }
+  .cell { padding: 22px 0 26px; border-right: 0; }
+  .cells { border-left: 0; }
+}
+
+/* --- 18. Темы выступлений ------------------------------------------------ */
+
+.topics { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.topics li {
+  display: grid; grid-template-columns: 4.5rem 1fr;
+  gap: 8px; align-items: baseline;
+  padding: 22px 0; border-bottom: 1px solid var(--rule-soft);
+  transition: padding-left .2s cubic-bezier(.2,.7,.3,1);
+}
+.topics li:hover { padding-left: 12px; }
+.topics li b {
+  font-family: var(--mono); font-size: .75rem; font-weight: 400;
+  color: var(--ink-3); letter-spacing: .1em;
+}
+.topics li p {
+  font-family: var(--serif); font-size: clamp(1.0625rem, 1rem + .6vw, 1.5rem);
+  line-height: 1.32; max-width: 30ch;
+}
+
+.formats { margin-top: clamp(44px, 6vh, 70px); }
+.fmt-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.fmt-list span {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .02em;
+  color: var(--ink-2); border: 1px solid var(--rule);
+  padding: 7px 12px;
+}
+
+/* --- 19. Рамки ----------------------------------------------------------- */
+
+.rules { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 72px); }
+.rules ul { list-style: none; margin: 0; padding: 0; }
+.rules li {
+  font-family: var(--sans); font-size: .9375rem; line-height: 1.5;
+  padding: 13px 0 13px 26px; border-bottom: 1px solid var(--rule-soft);
+  position: relative;
+}
+.rules li::before {
+  position: absolute; left: 0; top: 13px;
+  font-family: var(--mono); font-size: .8125rem;
+}
+.yes li::before { content: "+"; color: var(--accent); }
+.no li { color: var(--ink-3); text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--rule); }
+.no li::before { content: "−"; color: var(--ink-3); text-decoration: none; }
+@media (max-width: 720px) { .rules { grid-template-columns: 1fr; } }
+
+.pull {
+  margin: clamp(48px, 7vh, 84px) 0 0; padding: 0 0 0 clamp(18px, 3vw, 34px);
+  border-left: 2px solid var(--accent);
+  max-width: 46ch;
+}
+.pull p {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(1.1875rem, 1.1rem + .8vw, 1.75rem);
+  line-height: 1.38;
+}
+
+/* --- 20. Связь ----------------------------------------------------------- */
+
+.contact-lead {
+  font-size: clamp(1.125rem, 1.05rem + .5vw, 1.5rem);
+  line-height: 1.46; max-width: 38ch;
+  margin-bottom: clamp(38px, 6vh, 64px);
+}
+.chan { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.chan li {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 16px; align-items: baseline;
+  padding: 20px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.chan li:last-child { border-bottom: 1px solid var(--rule); }
+.ch-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.ch-v {
+  font-family: var(--sans); font-size: clamp(1.0625rem, 2.4vw, 1.375rem);
+  font-weight: 500; letter-spacing: -.02em;
+  color: var(--accent); text-decoration: none;
+  border-bottom: 1px solid transparent; justify-self: start;
+  transition: border-color .18s;
+}
+a.ch-v:hover { border-bottom-color: var(--accent); }
+.ch-n { font-family: var(--mono); font-size: .75rem; color: var(--ink-3); line-height: 1.6; }
+@media (max-width: 760px) {
+  .chan li { grid-template-columns: 1fr; gap: 6px; }
+}
+
+.dim-end { margin-top: clamp(60px, 9vh, 110px); }
+
+/* --- 21. Подвал ---------------------------------------------------------- */
+
+.foot {
+  border-top: 1px solid var(--rule);
+  padding-block: 26px clamp(80px, 11vh, 120px);
+}
+.foot-grid {
+  display: flex; flex-wrap: wrap; gap: 10px 44px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  color: var(--ink-2); text-transform: lowercase;
+}
+.foot-grid p { display: flex; gap: 10px; }
+.foot-grid span { color: var(--ink-3); text-transform: uppercase; letter-spacing: .2em; }
