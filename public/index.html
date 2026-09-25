@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,9 +7,9 @@
 <title>Нарек Погосян — предприниматель, архитектор бизнес-систем</title>
 <meta name="description" content="17 лет в строительстве, 500+ объектов, оборот компании около миллиарда рублей. Заказчики: Магнит, Ozon, Пятёрочка, Брусника, ЛСР, Минобороны. Метод и разбор вместо мотивации.">
 
-<!-- Адрес сайта на Cloudflare пока не зафиксирован. Когда домен будет
-     известен, раскомментируйте обе строки и подставьте его. Пустой
-     canonical хуже отсутствующего, поэтому тут его нет.
+<!-- Адрес сайта пока не зафиксирован. Когда домен будет известен,
+     раскомментируйте обе строки и подставьте его. Пустой canonical
+     хуже отсутствующего, поэтому тут его нет.
 <link rel="canonical" href="https://ДОМЕН/">
 <meta property="og:url" content="https://ДОМЕН/">
 -->
@@ -27,6 +27,24 @@
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23121110'/%3E%3Cpath d='M7 25V7h3l12 13V7h3v18h-3L10 12v13z' fill='%23d2703f'/%3E%3C/svg%3E">
 
+<!-- Тема и язык ставятся до первой отрисовки, иначе страница мигнёт чужим
+     цветом. Без этого скрипта разметка остаётся нейтральной, и тему берёт
+     на себя медиазапрос prefers-color-scheme — сайт работает и без JS. -->
+<script>
+(function () {
+  var d = document.documentElement;
+  try {
+    var t = localStorage.getItem('np-theme');
+    if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+  } catch (e) {}
+  try {
+    var q = new URLSearchParams(location.search).get('lang');
+    var l = q || localStorage.getItem('np-lang');
+    if (l === 'en') { d.lang = 'en'; d.setAttribute('data-lang', 'en'); }
+  } catch (e) {}
+}());
+</script>
+
 <link rel="preload" href="fonts/plex-sans-400-600-normal-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/pt-serif-400-normal-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/plex-mono-400-normal-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
@@ -35,105 +53,118 @@
 </head>
 
 <body>
-<a class="skip" href="#s01">К содержанию</a>
+<a class="skip" href="#s01" data-i18n="skip">К содержанию</a>
 
 <!-- Рамка листа: поля, угловые засечки и координатная сетка по краям -->
 <div class="sheet-frame" aria-hidden="true">
   <div class="sf-border"></div>
   <b class="sf-corner tl"></b><b class="sf-corner tr"></b>
   <b class="sf-corner bl"></b><b class="sf-corner br"></b>
-  <div class="sf-coords sf-cols"><i>А</i><i>Б</i><i>В</i><i>Г</i><i>Д</i><i>Е</i></div>
+  <div class="sf-coords sf-cols" id="sfCols"><i>А</i><i>Б</i><i>В</i><i>Г</i><i>Д</i><i>Е</i></div>
   <div class="sf-coords sf-rows"><i>1</i><i>2</i><i>3</i><i>4</i></div>
 </div>
 
+<!-- Блок управления: язык и тема. Наверху справа, как поле примечаний
+     на чертеже. Работает только при включённом JS, поэтому и вставляется
+     скриптом — иначе висели бы мёртвые кнопки. -->
+<div class="ctl" id="ctl" hidden>
+  <div class="ctl-set" role="group" aria-label="Язык / Language">
+    <button type="button" class="ctl-b" data-lang-set="ru" aria-pressed="true">Рус</button>
+    <button type="button" class="ctl-b" data-lang-set="en" aria-pressed="false">Eng</button>
+  </div>
+  <div class="ctl-set" role="group" data-i18n-aria="ctl.theme" aria-label="Тема оформления">
+    <button type="button" class="ctl-b" data-theme-set="light" aria-pressed="true" data-i18n="ctl.light">День</button>
+    <button type="button" class="ctl-b" data-theme-set="dark" aria-pressed="false" data-i18n="ctl.dark">Ночь</button>
+  </div>
+</div>
+
 <!-- Корешок с номерами листов -->
-<nav class="rail" aria-label="Разделы">
+<nav class="rail" data-i18n-aria="rail.label" aria-label="Разделы">
   <ol>
-    <li><a href="#s01" data-rail="01"><b>01</b><span>Обложка</span></a></li>
-    <li><a href="#s02" data-rail="02"><b>02</b><span>Позиция</span></a></li>
-    <li><a href="#s03" data-rail="03"><b>03</b><span>Ведомость</span></a></li>
-    <li><a href="#s04" data-rail="04"><b>04</b><span>Метод</span></a></li>
-    <li><a href="#s05" data-rail="05"><b>05</b><span>Реестр объектов</span></a></li>
-    <li><a href="#s06" data-rail="06"><b>06</b><span>Экспертиза</span></a></li>
-    <li><a href="#s07" data-rail="07"><b>07</b><span>Выступления</span></a></li>
-    <li><a href="#s08" data-rail="08"><b>08</b><span>Рамки</span></a></li>
-    <li><a href="#s09" data-rail="09"><b>09</b><span>Связь</span></a></li>
+    <li><a href="#s01" data-rail="01"><b>01</b><span data-i18n="s01.name">Обложка</span></a></li>
+    <li><a href="#s02" data-rail="02"><b>02</b><span data-i18n="s02.name">Позиция</span></a></li>
+    <li><a href="#s03" data-rail="03"><b>03</b><span data-i18n="s03.name">Ведомость</span></a></li>
+    <li><a href="#s04" data-rail="04"><b>04</b><span data-i18n="s04.name">Метод</span></a></li>
+    <li><a href="#s05" data-rail="05"><b>05</b><span data-i18n="s05.name">Реестр объектов</span></a></li>
+    <li><a href="#s06" data-rail="06"><b>06</b><span data-i18n="s06.name">Экспертиза</span></a></li>
+    <li><a href="#s07" data-rail="07"><b>07</b><span data-i18n="s07.name">Выступления</span></a></li>
+    <li><a href="#s08" data-rail="08"><b>08</b><span data-i18n="s08.name">Рамки</span></a></li>
+    <li><a href="#s09" data-rail="09"><b>09</b><span data-i18n="s09.name">Связь</span></a></li>
   </ol>
 </nav>
 
 <!-- Штамп -->
 <div class="stamp">
   <div class="st-row st-name">
-    <span class="st-who">Нарек Погосян</span>
-    <span class="st-role">архитектор бизнес-систем</span>
+    <span class="st-who" data-i18n="who">Нарек Погосян</span>
+    <span class="st-role" data-i18n="role">архитектор бизнес-систем</span>
   </div>
   <div class="st-row st-meta">
-    <span class="st-sheet">лист <b id="stampNum">01</b>/09</span>
+    <span class="st-sheet"><span data-i18n="sheet">лист</span> <b id="stampNum">01</b>/09</span>
     <span class="st-title" id="stampTitle">Обложка</span>
-    <button class="st-theme" id="themeBtn" type="button" aria-label="Переключить тему">день</button>
   </div>
 </div>
 
 <main>
 
 <!-- ═══ 01 ═══════════════════════════════════════════ -->
-<section id="s01" class="sec sec-cover" data-num="01" data-title="Обложка">
+<section id="s01" class="sec sec-cover" data-num="01" data-title-key="s01.name">
   <div class="wrap">
-    <p class="tag">Лист 01 · Обложка · масштаб 1:1</p>
+    <p class="tag" data-i18n="s01.tag">Лист 01 · Обложка · масштаб 1:1</p>
 
     <div class="cover-top">
       <h1 class="name">
-        <span>Нарек</span>
-        <span>Погосян</span>
+        <span data-i18n="first">Нарек</span>
+        <span data-i18n="last">Погосян</span>
       </h1>
 
       <figure class="portrait">
-        <img src="img/portret.jpg" alt="Нарек Погосян" width="760" height="950"
+        <img src="img/portret.jpg" data-i18n-alt="who" alt="Нарек Погосян" width="760" height="950"
              fetchpriority="high" decoding="async">
       </figure>
     </div>
 
-    <div class="dim" role="presentation"><span>17 лет в стройке</span></div>
+    <div class="dim" role="presentation"><span data-i18n="s01.dim">17 лет в стройке</span></div>
 
     <div class="cover-grid">
-      <p class="lede">
+      <p class="lede" data-i18n="s01.lede">
         Предприниматель-практик. Строю здания — и системы,
         по которым работают компании. От фасадов для Магнита
         и складов Озона до вывода малого бизнеса из ручного
         управления в работающий процесс.
       </p>
-      <p class="lede-note">
+      <p class="lede-note" data-i18n-html="s01.note">
         Не мотивация. Не «успешный успех».<br>
         Метод и разбор.
       </p>
     </div>
 
     <dl class="facts">
-      <div><dt>Лет в строительстве</dt><dd><b>17</b></dd></div>
-      <div><dt>Реализовано объектов</dt><dd><b>500+</b></dd></div>
-      <div><dt>Оборот компании, год</dt><dd><b>≈1</b><i>млрд&nbsp;₽</i></dd></div>
+      <div><dt data-i18n="s01.f1">Лет в строительстве</dt><dd><b>17</b></dd></div>
+      <div><dt data-i18n="s01.f2">Реализовано объектов</dt><dd><b>500+</b></dd></div>
+      <div><dt data-i18n="s01.f3">Оборот компании, год</dt><dd><b>≈1</b><i data-i18n="unit.bn">млрд&nbsp;₽</i></dd></div>
     </dl>
   </div>
 </section>
 
 <!-- ═══ 02 ═══════════════════════════════════════════ -->
-<section id="s02" class="sec" data-num="02" data-title="Позиция">
+<section id="s02" class="sec" data-num="02" data-title-key="s02.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 02</p>
-      <h2>Позиция</h2>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 02</p>
+      <h2 data-i18n="s02.name">Позиция</h2>
     </header>
 
     <div class="two-col">
       <div class="col-side">
-        <p class="side-label">Кто</p>
-        <p class="side-note">
+        <p class="side-label" data-i18n="s02.l1">Кто</p>
+        <p class="side-note" data-i18n="s02.n1">
           Предприниматель из реального сектора.
           В стройке с 16 лет: подсобник → мастер →
           бригадир → собственник.
         </p>
-        <p class="side-label">Что делаю</p>
-        <p class="side-note">
+        <p class="side-label" data-i18n="s02.l2">Что делаю</p>
+        <p class="side-note" data-i18n="s02.n2">
           Собираю разрозненное в работающее целое.
           Процессы, регламенты, воронка, CRM,
           автоматизация — там, где бизнес упёрся
@@ -142,35 +173,37 @@
       </div>
 
       <div class="col-main">
-        <p class="prose-lead">
+        <p class="prose-lead" data-i18n="s02.p1">
           Вместе с командой реализовал более 500 объектов: фасадные работы,
           остекление, благоустройство, ремонт коммерческой и премиальной
           недвижимости. Полный цикл — от проектирования и согласований
           до монтажа и сдачи с документацией.
         </p>
-        <p class="prose">
+        <p class="prose" data-i18n="s02.p2">
           Среди заказчиков — Магнит, Ozon, Пятёрочка, Брусника, Гранель, ЛСР,
           Минобороны РФ, частные девелоперы коммерческой недвижимости.
           Это сетевой подряд под жёсткие сроки: там ошибка стоит денег сразу,
           а не через квартал. Такая школа и научила меня главному —
           отделять то, что решает результат, от того, что его только украшает.
         </p>
-        <p class="prose">
+        <p class="prose" data-i18n="s02.p3">
           С 2020 года переношу этот метод в другую плоскость: продажи,
           маркетплейсы, CRM, автоматизация, управление в малом и среднем
           бизнесе. Инструменты разные — принцип один.
         </p>
 
-        <!-- Портрет с объекта. Положите файл в img/ и раскомментируйте:
+        <!-- Кадр с объекта. Положите файл в img/ и раскомментируйте:
         <figure class="shot">
-          <img src="img/portret.jpg" alt="Нарек Погосян на объекте" width="1200" height="1500" loading="lazy" decoding="async">
+          <img src="img/obj.jpg" alt="Объект в работе" width="1200" height="1500" loading="lazy" decoding="async">
           <figcaption>Подпись: объект, город, год</figcaption>
         </figure>
         -->
 
         <figure class="formula">
-          <div class="fx"><span>Понимание</span><em>=</em><span>Ясность</span><em>=</em><span>Система</span></div>
-          <figcaption>Без понимания нет ясности. Без ясности нет системы. Без системы нет бизнеса.</figcaption>
+          <div class="fx">
+            <span data-i18n="fx1">Понимание</span><em>=</em><span data-i18n="fx2">Ясность</span><em>=</em><span data-i18n="fx3">Система</span>
+          </div>
+          <figcaption data-i18n="s02.fxc">Без понимания нет ясности. Без ясности нет системы. Без системы нет бизнеса.</figcaption>
         </figure>
       </div>
     </div>
@@ -178,35 +211,40 @@
 </section>
 
 <!-- ═══ 03 ═══════════════════════════════════════════ -->
-<section id="s03" class="sec" data-num="03" data-title="Ведомость">
+<section id="s03" class="sec" data-num="03" data-title-key="s03.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 03</p>
-      <h2>Ведомость<br>показателей</h2>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 03</p>
+      <h2 data-i18n-html="s03.h">Ведомость<br>показателей</h2>
     </header>
 
     <table class="ved">
-      <caption class="vis-hidden">Ключевые показатели практики</caption>
+      <caption class="vis-hidden" data-i18n="s03.cap">Ключевые показатели практики</caption>
       <thead>
-        <tr><th scope="col" class="c-pos">Поз.</th><th scope="col">Наименование</th><th scope="col" class="c-val">Значение</th><th scope="col" class="c-note">Примечание</th></tr>
+        <tr>
+          <th scope="col" class="c-pos" data-i18n="th.pos">Поз.</th>
+          <th scope="col" data-i18n="th.item">Наименование</th>
+          <th scope="col" class="c-val" data-i18n="th.val">Значение</th>
+          <th scope="col" class="c-note" data-i18n="th.note">Примечание</th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td class="c-pos">1</td><td>Опыт в строительстве</td><td class="c-val">17 лет</td><td class="c-note">с 16 лет, без перерыва</td></tr>
-        <tr><td class="c-pos">2</td><td>Реализовано объектов</td><td class="c-val">500+</td><td class="c-note">коммерция, ритейл, склады, премиум</td></tr>
-        <tr><td class="c-pos">3</td><td>Годовой оборот компании</td><td class="c-val">≈ 1 млрд ₽</td><td class="c-note">группа направлений</td></tr>
-        <tr><td class="c-pos">4</td><td>Крупнейший контракт</td><td class="c-val">600+ млн ₽</td><td class="c-note">объект 16 000 м²</td></tr>
-        <tr><td class="c-pos">5</td><td>Направление вент-фасадов</td><td class="c-val">до 300 млн ₽</td><td class="c-note">производство и монтаж</td></tr>
-        <tr><td class="c-pos">6</td><td>Рост продаж на Авито у клиента</td><td class="c-val">×10</td><td class="c-note">после сборки позиционирования</td></tr>
-        <tr><td class="c-pos">7</td><td>Стоимость лида</td><td class="c-val">2 500 → 400 ₽</td><td class="c-note">снижение в 6 раз</td></tr>
+        <tr><td class="c-pos">1</td><td data-i18n="v1">Опыт в строительстве</td><td class="c-val" data-i18n="v1v">17 лет</td><td class="c-note" data-i18n="v1n">с 16 лет, без перерыва</td></tr>
+        <tr><td class="c-pos">2</td><td data-i18n="v2">Реализовано объектов</td><td class="c-val">500+</td><td class="c-note" data-i18n="v2n">коммерция, ритейл, склады, премиум</td></tr>
+        <tr><td class="c-pos">3</td><td data-i18n="v3">Годовой оборот компании</td><td class="c-val" data-i18n="v3v">≈ 1 млрд ₽</td><td class="c-note" data-i18n="v3n">группа направлений</td></tr>
+        <tr><td class="c-pos">4</td><td data-i18n="v4">Крупнейший контракт</td><td class="c-val" data-i18n="v4v">600+ млн ₽</td><td class="c-note" data-i18n="v4n">объект 16 000 м²</td></tr>
+        <tr><td class="c-pos">5</td><td data-i18n="v5">Направление вент-фасадов</td><td class="c-val" data-i18n="v5v">до 300 млн ₽</td><td class="c-note" data-i18n="v5n">производство и монтаж</td></tr>
+        <tr><td class="c-pos">6</td><td data-i18n="v6">Рост продаж на Авито у клиента</td><td class="c-val">×10</td><td class="c-note" data-i18n="v6n">после сборки позиционирования</td></tr>
+        <tr><td class="c-pos">7</td><td data-i18n="v7">Стоимость лида</td><td class="c-val">2 500 → 400 ₽</td><td class="c-note" data-i18n="v7n">снижение в 6 раз</td></tr>
       </tbody>
     </table>
 
-    <div class="ticker" aria-label="Заказчики">
-      <p class="tag tag-inline">Заказчики</p>
+    <div class="ticker" data-i18n-aria="s03.clients" aria-label="Заказчики">
+      <p class="tag tag-inline" data-i18n="s03.clients">Заказчики</p>
       <div class="tick-view">
         <div class="tick-row">
-          <span>Магнит</span><span>Ozon</span><span>Пятёрочка</span><span>Брусника</span><span>Гранель</span><span>ЛСР</span><span>X5</span><span>Дикси</span><span>Лента</span><span>ДА!</span><span>Минобороны&nbsp;РФ</span><span>частные девелоперы</span>
-          <span aria-hidden="true">Магнит</span><span aria-hidden="true">Ozon</span><span aria-hidden="true">Пятёрочка</span><span aria-hidden="true">Брусника</span><span aria-hidden="true">Гранель</span><span aria-hidden="true">ЛСР</span><span aria-hidden="true">X5</span><span aria-hidden="true">Дикси</span><span aria-hidden="true">Лента</span><span aria-hidden="true">ДА!</span><span aria-hidden="true">Минобороны&nbsp;РФ</span><span aria-hidden="true">частные девелоперы</span>
+          <span data-i18n="br.magnit">Магнит</span><span>Ozon</span><span data-i18n="br.pyat">Пятёрочка</span><span data-i18n="br.brus">Брусника</span><span data-i18n="br.granel">Гранель</span><span data-i18n="br.lsr">ЛСР</span><span>X5</span><span data-i18n="br.dixy">Дикси</span><span data-i18n="br.lenta">Лента</span><span data-i18n="br.da">ДА!</span><span data-i18n="mod">Минобороны&nbsp;РФ</span><span data-i18n="devs">частные девелоперы</span>
+          <span aria-hidden="true" data-i18n="br.magnit">Магнит</span><span aria-hidden="true">Ozon</span><span aria-hidden="true" data-i18n="br.pyat">Пятёрочка</span><span aria-hidden="true" data-i18n="br.brus">Брусника</span><span aria-hidden="true" data-i18n="br.granel">Гранель</span><span aria-hidden="true" data-i18n="br.lsr">ЛСР</span><span aria-hidden="true">X5</span><span aria-hidden="true" data-i18n="br.dixy">Дикси</span><span aria-hidden="true" data-i18n="br.lenta">Лента</span><span aria-hidden="true" data-i18n="br.da">ДА!</span><span aria-hidden="true" data-i18n="mod">Минобороны&nbsp;РФ</span><span aria-hidden="true" data-i18n="devs">частные девелоперы</span>
         </div>
       </div>
     </div>
@@ -214,24 +252,24 @@
 </section>
 
 <!-- ═══ 04 ═══════════════════════════════════════════ -->
-<section id="s04" class="sec" data-num="04" data-title="Метод">
+<section id="s04" class="sec" data-num="04" data-title-key="s04.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 04</p>
-      <h2>Метод</h2>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 04</p>
+      <h2 data-i18n="s04.name">Метод</h2>
     </header>
 
     <div class="two-col">
       <div class="col-side">
-        <p class="side-label">Суть</p>
-        <p class="side-note">
+        <p class="side-label" data-i18n="s04.l1">Суть</p>
+        <p class="side-note" data-i18n="s04.n1">
           В каждой задаче есть ключевое — то, ради чего
           всё затевалось. Главная задача CRM — продажа,
           а не заполненная карточка. Главное в маркетинге —
           прибыль, а не шрифты.
         </p>
-        <p class="side-label">Следствие</p>
-        <p class="side-note">
+        <p class="side-label" data-i18n="s04.l2">Следствие</p>
+        <p class="side-note" data-i18n="s04.n2">
           Большинство доводит до блеска упаковку и теряет
           причинно-следственную связь: куда это приведёт
           и зачем.
@@ -239,38 +277,38 @@
       </div>
 
       <div class="col-main">
-        <p class="prose-lead">
+        <p class="prose-lead" data-i18n="s04.p1">
           Перед стартом проекта я не пишу план в одиночку. Я собираю картину
           мира всех участников и свожу её в одну карту — до того, как кто-то
           что-то сделал.
         </p>
 
-        <p class="tag tag-inline mt">Картирование проекта · 8 шагов</p>
+        <p class="tag tag-inline mt" data-i18n="s04.steps">Картирование проекта · 8 шагов</p>
         <ol class="steps">
-          <li><b>01</b><span>Совещание всех участников проекта</span></li>
-          <li><b>02</b><span>Каждый проговаривает свою картину целиком</span></li>
-          <li><b>03</b><span>Запись и транскрибация всех голосов</span></li>
-          <li><b>04</b><span>Обработка: суммаризация, выделение узлов</span></li>
-          <li><b>05</b><span>Карта общего видения после мозгового штурма</span></li>
-          <li><b>06</b><span>Второе совещание: обсуждение карты, ответственные</span></li>
-          <li><b>07</b><span>Итоговая карта проекта</span></li>
-          <li><b>08</b><span>Только после этого — старт работ</span></li>
+          <li><b>01</b><span data-i18n="st1">Совещание всех участников проекта</span></li>
+          <li><b>02</b><span data-i18n="st2">Каждый проговаривает свою картину целиком</span></li>
+          <li><b>03</b><span data-i18n="st3">Запись и транскрибация всех голосов</span></li>
+          <li><b>04</b><span data-i18n="st4">Обработка: суммаризация, выделение узлов</span></li>
+          <li><b>05</b><span data-i18n="st5">Карта общего видения после мозгового штурма</span></li>
+          <li><b>06</b><span data-i18n="st6">Второе совещание: обсуждение карты, ответственные</span></li>
+          <li><b>07</b><span data-i18n="st7">Итоговая карта проекта</span></li>
+          <li><b>08</b><span data-i18n="st8">Только после этого — старт работ</span></li>
         </ol>
-        <p class="steps-note">
+        <p class="steps-note" data-i18n="s04.sn">
           В головах выстраивается одна картинка. Появляется синхронизация,
           и каждый понимает, что и как делать. Это и есть «понимание = ясность =
           система» на практике.
         </p>
 
-        <p class="tag tag-inline mt">Инструмент подбора людей</p>
+        <p class="tag tag-inline mt" data-i18n="s04.people">Инструмент подбора людей</p>
         <div class="vs">
           <div class="vs-col vs-plus">
-            <p class="vs-h">Центростремительные</p>
-            <p>Собирают и несут мир. Уменьшают энтропию вокруг себя. С ними система держится, когда вас нет в комнате.</p>
+            <p class="vs-h" data-i18n="s04.in">Центростремительные</p>
+            <p data-i18n="s04.inp">Собирают и несут мир. Уменьшают энтропию вокруг себя. С ними система держится, когда вас нет в комнате.</p>
           </div>
           <div class="vs-col vs-minus">
-            <p class="vs-h">Центробежные</p>
-            <p>Разлагают, разбрасывают, думают только о себе. Любая структура при них расползается — вне зависимости от квалификации.</p>
+            <p class="vs-h" data-i18n="s04.out">Центробежные</p>
+            <p data-i18n="s04.outp">Разлагают, разбрасывают, думают только о себе. Любая структура при них расползается — вне зависимости от квалификации.</p>
           </div>
         </div>
       </div>
@@ -279,181 +317,181 @@
 </section>
 
 <!-- ═══ 05 ═══════════════════════════════════════════ -->
-<section id="s05" class="sec" data-num="05" data-title="Реестр объектов">
+<section id="s05" class="sec" data-num="05" data-title-key="s05.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 05</p>
-      <h2>Реестр<br>объектов</h2>
-      <p class="sec-sub">Строки раскрываются. Цифры — фактические, без округления вверх.</p>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 05</p>
+      <h2 data-i18n-html="s05.h">Реестр<br>объектов</h2>
+      <p class="sec-sub" data-i18n="s05.sub">Строки раскрываются. Цифры — фактические, без округления вверх.</p>
     </header>
 
-    <p class="tag tag-inline">А · Строительство и подряд</p>
+    <p class="tag tag-inline" data-i18n="s05.ga">А · Строительство и подряд</p>
     <div class="reg" id="reg1">
       <div class="reg-head" aria-hidden="true">
-        <span class="r-n">№</span><span class="r-o">Объект</span><span class="r-p">Параметр</span><span class="r-t">Срок</span><span class="r-s">Сумма</span>
+        <span class="r-n">№</span><span class="r-o" data-i18n="th.obj">Объект</span><span class="r-p" data-i18n="th.par">Параметр</span><span class="r-t" data-i18n="th.time">Срок</span><span class="r-s" data-i18n="th.sum">Сумма</span>
       </div>
 
       <details class="reg-row">
-        <summary><span class="r-n">01</span><span class="r-o">Гранель — складской комплекс</span><span class="r-p">16 000 м²</span><span class="r-t">полный цикл</span><span class="r-s">600+ млн ₽</span></summary>
-        <div class="reg-body"><p>Крупнейший контракт в практике. Полный цикл: от проектирования и согласований до монтажа и сдачи с исполнительной документацией.</p></div>
+        <summary><span class="r-n">01</span><span class="r-o" data-i18n="o1">Гранель — складской комплекс</span><span class="r-p">16 000 м²</span><span class="r-t" data-i18n="o1t">полный цикл</span><span class="r-s" data-i18n="o1s">600+ млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o1d">Крупнейший контракт в практике. Полный цикл: от проектирования и согласований до монтажа и сдачи с исполнительной документацией.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">02</span><span class="r-o">Ozon — складской комплекс</span><span class="r-p">16 000 м²</span><span class="r-t">60 дней</span><span class="r-s is-empty">—</span></summary>
-        <div class="reg-body"><p>Зима. Готового проекта на старте нет. 120 человек в две смены. Проектные решения принимались параллельно с производством работ.</p></div>
+        <summary><span class="r-n">02</span><span class="r-o" data-i18n="o2">Ozon — складской комплекс</span><span class="r-p">16 000 м²</span><span class="r-t" data-i18n="o2t">60 дней</span><span class="r-s is-empty">—</span></summary>
+        <div class="reg-body"><p data-i18n="o2d">Зима. Готового проекта на старте нет. 120 человек в две смены. Проектные решения принимались параллельно с производством работ.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">03</span><span class="r-o">Магнит, Одинцово — с нуля под ключ</span><span class="r-p">1 050 м²</span><span class="r-t">21 день</span><span class="r-s is-empty">—</span></summary>
-        <div class="reg-body"><p>60+ человек на объекте одновременно. Показательный кейс по плотности управления: весь смысл — в расстановке людей и очерёдности работ.</p></div>
+        <summary><span class="r-n">03</span><span class="r-o" data-i18n="o3">Магнит, Одинцово — с нуля под ключ</span><span class="r-p">1 050 м²</span><span class="r-t" data-i18n="o3t">21 день</span><span class="r-s is-empty">—</span></summary>
+        <div class="reg-body"><p data-i18n="o3d">60+ человек на объекте одновременно. Показательный кейс по плотности управления: весь смысл — в расстановке людей и очерёдности работ.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">04</span><span class="r-o">Магнит, Пятёрочка — типовые объекты</span><span class="r-p">серия</span><span class="r-t">30 дней</span><span class="r-s">10–35 млн ₽</span></summary>
-        <div class="reg-body"><p>Поток типовых объектов под ключ в сроки федеральной сети. Здесь выигрывает не героизм, а повторяемый регламент.</p></div>
+        <summary><span class="r-n">04</span><span class="r-o" data-i18n="o4">Магнит, Пятёрочка — типовые объекты</span><span class="r-p" data-i18n="o4p">серия</span><span class="r-t" data-i18n="o4t">30 дней</span><span class="r-s" data-i18n="o4s">10–35 млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o4d">Поток типовых объектов под ключ в сроки федеральной сети. Здесь выигрывает не героизм, а повторяемый регламент.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">05</span><span class="r-o">Минобороны РФ — объекты под ключ</span><span class="r-p">госконтракт</span><span class="r-t is-empty">—</span><span class="r-s">250 млн ₽</span></summary>
-        <div class="reg-body"><p>Отдельный уровень требований к документации, допускам и дисциплине сроков.</p></div>
+        <summary><span class="r-n">05</span><span class="r-o" data-i18n="o5">Минобороны РФ — объекты под ключ</span><span class="r-p" data-i18n="o5p">госконтракт</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o5s">250 млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o5d">Отдельный уровень требований к документации, допускам и дисциплине сроков.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">06</span><span class="r-o">Благоустройство на месте леса</span><span class="r-p">30 000 м²</span><span class="r-t">90 дней</span><span class="r-s">180 млн ₽</span></summary>
-        <div class="reg-body"><p>Площадка с нуля: от расчистки до сдачи благоустроенной территории.</p></div>
+        <summary><span class="r-n">06</span><span class="r-o" data-i18n="o6">Благоустройство на месте леса</span><span class="r-p">30 000 м²</span><span class="r-t" data-i18n="o6t">90 дней</span><span class="r-s" data-i18n="o6s">180 млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o6d">Площадка с нуля: от расчистки до сдачи благоустроенной территории.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">07</span><span class="r-o">Логистический склад на месте леса</span><span class="r-p is-empty">—</span><span class="r-t">2 месяца</span><span class="r-s is-empty">—</span></summary>
-        <div class="reg-body"><p>Две смены без выходных. Сроки держались за счёт заранее собранной карты проекта, а не за счёт авралов.</p></div>
+        <summary><span class="r-n">07</span><span class="r-o" data-i18n="o7">Логистический склад на месте леса</span><span class="r-p is-empty">—</span><span class="r-t" data-i18n="o7t">2 месяца</span><span class="r-s is-empty">—</span></summary>
+        <div class="reg-body"><p data-i18n="o7d">Две смены без выходных. Сроки держались за счёт заранее собранной карты проекта, а не за счёт авралов.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">08</span><span class="r-o">Вент-фасады и подсистемы</span><span class="r-p">направление</span><span class="r-t is-empty">—</span><span class="r-s">до 300+ млн ₽</span></summary>
-        <div class="reg-body"><p>Собственное производство и монтаж. Рекомендованный поставщик федеральных сетей: качественное и дешёвое решение по оформлению фасадов забрало большую часть рынка.</p></div>
+        <summary><span class="r-n">08</span><span class="r-o" data-i18n="o8">Вент-фасады и подсистемы</span><span class="r-p" data-i18n="o8p">направление</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o8s">до 300+ млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o8d">Собственное производство и монтаж. Рекомендованный поставщик федеральных сетей: качественное и дешёвое решение по оформлению фасадов забрало большую часть рынка.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">09</span><span class="r-o">Светопрозрачные конструкции</span><span class="r-p">окна, витражи</span><span class="r-t is-empty">—</span><span class="r-s">до 60+ млн ₽</span></summary>
-        <div class="reg-body"><p>Остекление коммерческих и премиальных объектов.</p></div>
+        <summary><span class="r-n">09</span><span class="r-o" data-i18n="o9">Светопрозрачные конструкции</span><span class="r-p" data-i18n="o9p">окна, витражи</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o9s">до 60+ млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o9d">Остекление коммерческих и премиальных объектов.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">10</span><span class="r-o">Премиум-дома и офисы под ключ</span><span class="r-p">объект</span><span class="r-t is-empty">—</span><span class="r-s">до 50 млн ₽</span></summary>
-        <div class="reg-body"><p>Частные заказчики, люкс-сегмент. Другой тип требований: не срок, а допуск по качеству.</p></div>
+        <summary><span class="r-n">10</span><span class="r-o" data-i18n="o10">Премиум-дома и офисы под ключ</span><span class="r-p" data-i18n="o10p">объект</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o10s">до 50 млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o10d">Частные заказчики, люкс-сегмент. Другой тип требований: не срок, а допуск по качеству.</p></div>
       </details>
     </div>
 
-    <p class="tag tag-inline mt">Б · Системы, продажи, автоматизация</p>
+    <p class="tag tag-inline mt" data-i18n="s05.gb">Б · Системы, продажи, автоматизация</p>
     <div class="reg">
       <details class="reg-row">
-        <summary><span class="r-n">11</span><span class="r-o">Битрикс24 — кастомная автоматизация</span><span class="r-p">бизнес-процессы</span><span class="r-t is-empty">—</span><span class="r-s">2,5 млн ₽</span></summary>
-        <div class="reg-body"><p>Первый оформленный кейс по системному IT-консалтингу. CRM собиралась под методологию продаж, а не под красоту карточек.</p></div>
+        <summary><span class="r-n">11</span><span class="r-o" data-i18n="o11">Битрикс24 — кастомная автоматизация</span><span class="r-p" data-i18n="o11p">бизнес-процессы</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o11s">2,5 млн ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o11d">Первый оформленный кейс по системному IT-консалтингу. CRM собиралась под методологию продаж, а не под красоту карточек.</p></div>
       </details>
 
       <details class="reg-row">
-        <summary><span class="r-n">12</span><span class="r-o">Авито — кампании и воронка</span><span class="r-p">рост ×10</span><span class="r-t is-empty">—</span><span class="r-s">лид 2 500 → 400 ₽</span></summary>
-        <div class="reg-body"><p>Четыре клиента: девелопер, подрядчик по благоустройству, продавец масел, продавец бытовой электроники. У всех четырёх сломано было одно и то же — позиционирование и JTBD. После пересборки продажи выросли, стоимость лида упала в шесть раз.</p></div>
+        <summary><span class="r-n">12</span><span class="r-o" data-i18n="o12">Авито — кампании и воронка</span><span class="r-p" data-i18n="o12p">рост ×10</span><span class="r-t is-empty">—</span><span class="r-s" data-i18n="o12s">лид 2 500 → 400 ₽</span></summary>
+        <div class="reg-body"><p data-i18n="o12d">Четыре клиента: девелопер, подрядчик по благоустройству, продавец масел, продавец бытовой электроники. У всех четырёх сломано было одно и то же — позиционирование и JTBD. После пересборки продажи выросли, стоимость лида упала в шесть раз.</p></div>
       </details>
     </div>
   </div>
 </section>
 
 <!-- ═══ 06 ═══════════════════════════════════════════ -->
-<section id="s06" class="sec" data-num="06" data-title="Экспертиза">
+<section id="s06" class="sec" data-num="06" data-title-key="s06.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 06</p>
-      <h2>Экспертиза</h2>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 06</p>
+      <h2 data-i18n="s06.name">Экспертиза</h2>
     </header>
 
     <div class="cells">
-      <article class="cell"><p class="cell-n">01</p><h3>Строительный бизнес</h3><p>17 лет практического опыта и 500+ объектов: фасады, остекление, благоустройство, коммерческая и премиальная недвижимость.</p></article>
-      <article class="cell"><p class="cell-n">02</p><h3>Управление</h3><p>Команда, ответственность, сроки, качество и контроль объектов. Большие бригады под сжатые сроки федеральных сетей.</p></article>
-      <article class="cell"><p class="cell-n">03</p><h3>Масштабирование</h3><p>Систематизация процессов и снижение зависимости бизнеса от собственника. Регламенты вместо памяти людей.</p></article>
-      <article class="cell"><p class="cell-n">04</p><h3>Предпринимательство</h3><p>Работа с крупными заказчиками, переговоры, решения, ошибки и рост компании — включая то, что не попадает в презентации.</p></article>
+      <article class="cell"><p class="cell-n">01</p><h3 data-i18n="e1">Строительный бизнес</h3><p data-i18n="e1p">17 лет практического опыта и 500+ объектов: фасады, остекление, благоустройство, коммерческая и премиальная недвижимость.</p></article>
+      <article class="cell"><p class="cell-n">02</p><h3 data-i18n="e2">Управление</h3><p data-i18n="e2p">Команда, ответственность, сроки, качество и контроль объектов. Большие бригады под сжатые сроки федеральных сетей.</p></article>
+      <article class="cell"><p class="cell-n">03</p><h3 data-i18n="e3">Масштабирование</h3><p data-i18n="e3p">Систематизация процессов и снижение зависимости бизнеса от собственника. Регламенты вместо памяти людей.</p></article>
+      <article class="cell"><p class="cell-n">04</p><h3 data-i18n="e4">Предпринимательство</h3><p data-i18n="e4p">Работа с крупными заказчиками, переговоры, решения, ошибки и рост компании — включая то, что не попадает в презентации.</p></article>
     </div>
   </div>
 </section>
 
 <!-- ═══ 07 ═══════════════════════════════════════════ -->
-<section id="s07" class="sec" data-num="07" data-title="Выступления">
+<section id="s07" class="sec" data-num="07" data-title-key="s07.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 07</p>
-      <h2>Выступления</h2>
-      <p class="sec-sub">Практические кейсы, цифры и управленческие решения. Без рекламной подачи.</p>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 07</p>
+      <h2 data-i18n="s07.name">Выступления</h2>
+      <p class="sec-sub" data-i18n="s07.sub">Практические кейсы, цифры и управленческие решения. Без рекламной подачи.</p>
     </header>
 
     <ol class="topics">
-      <li><b>01</b><p>500+ объектов: ошибки в строительном бизнесе, которые стоят денег</p></li>
-      <li><b>02</b><p>Как собственнику строительной компании не превратиться в главного прораба</p></li>
-      <li><b>03</b><p>Люди, сроки, деньги: как на самом деле устроено управление строительной компанией</p></li>
-      <li><b>04</b><p>Как масштабировать строительный бизнес и не потерять качество</p></li>
-      <li><b>05</b><p>От стройки своими руками до управления компанией</p></li>
+      <li><b>01</b><p data-i18n="t1">500+ объектов: ошибки в строительном бизнесе, которые стоят денег</p></li>
+      <li><b>02</b><p data-i18n="t2">Как собственнику строительной компании не превратиться в главного прораба</p></li>
+      <li><b>03</b><p data-i18n="t3">Люди, сроки, деньги: как на самом деле устроено управление строительной компанией</p></li>
+      <li><b>04</b><p data-i18n="t4">Как масштабировать строительный бизнес и не потерять качество</p></li>
+      <li><b>05</b><p data-i18n="t5">От стройки своими руками до управления компанией</p></li>
     </ol>
 
     <div class="formats">
-      <p class="tag tag-inline">Форматы</p>
+      <p class="tag tag-inline" data-i18n="s07.fmt">Форматы</p>
       <p class="fmt-list">
-        <span>Деловые и отраслевые конференции</span>
-        <span>Строительные и предпринимательские форумы</span>
-        <span>Панельные дискуссии</span>
-        <span>Круглые столы</span>
-        <span>Интервью и подкасты</span>
-        <span>Экспертные сессии</span>
+        <span data-i18n="f1">Деловые и отраслевые конференции</span>
+        <span data-i18n="f2">Строительные и предпринимательские форумы</span>
+        <span data-i18n="f3">Панельные дискуссии</span>
+        <span data-i18n="f4">Круглые столы</span>
+        <span data-i18n="f5">Интервью и подкасты</span>
+        <span data-i18n="f6">Экспертные сессии</span>
       </p>
     </div>
   </div>
 </section>
 
 <!-- ═══ 08 ═══════════════════════════════════════════ -->
-<section id="s08" class="sec" data-num="08" data-title="Рамки">
+<section id="s08" class="sec" data-num="08" data-title-key="s08.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 08</p>
-      <h2>Рамки</h2>
-      <p class="sec-sub">Чтобы не тратить время друг друга.</p>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 08</p>
+      <h2 data-i18n="s08.name">Рамки</h2>
+      <p class="sec-sub" data-i18n="s08.sub">Чтобы не тратить время друг друга.</p>
     </header>
 
     <div class="rules">
       <div class="rule-col">
-        <p class="tag tag-inline">Что здесь есть</p>
+        <p class="tag tag-inline" data-i18n="s08.yes">Что здесь есть</p>
         <ul class="yes">
-          <li>Разбор конкретной ситуации, а не общие советы</li>
-          <li>Цифры и кейсы, которые можно проверить</li>
-          <li>Метод, который отработан на объектах, а не в теории</li>
-          <li>Прямой язык: если решение гиблое — я так и скажу</li>
-          <li>Приземлённая философия дела</li>
+          <li data-i18n="y1">Разбор конкретной ситуации, а не общие советы</li>
+          <li data-i18n="y2">Цифры и кейсы, которые можно проверить</li>
+          <li data-i18n="y3">Метод, который отработан на объектах, а не в теории</li>
+          <li data-i18n="y4">Прямой язык: если решение гиблое — я так и скажу</li>
+          <li data-i18n="y5">Приземлённая философия дела</li>
         </ul>
       </div>
       <div class="rule-col">
-        <p class="tag tag-inline">Чего здесь нет</p>
+        <p class="tag tag-inline" data-i18n="s08.no">Чего здесь нет</p>
         <ul class="no">
-          <li>«Секретных техник» и «формул ×10»</li>
-          <li>Мотивации и «успешного успеха»</li>
-          <li>Обещаний результата за 30 дней</li>
-          <li>Дипломов и корочек вместо пройденного пути</li>
-          <li>Наставничества на уровне «просто поверь в себя»</li>
+          <li data-i18n="n1">«Секретных техник» и «формул ×10»</li>
+          <li data-i18n="n2">Мотивации и «успешного успеха»</li>
+          <li data-i18n="n3">Обещаний результата за 30 дней</li>
+          <li data-i18n="n4">Дипломов и корочек вместо пройденного пути</li>
+          <li data-i18n="n5">Наставничества на уровне «просто поверь в себя»</li>
         </ul>
       </div>
     </div>
 
     <blockquote class="pull">
-      <p>Эксперт — как профессор. Нельзя взять и стать экспертом. Экспертиза — это опыт, годы и пройденный путь.</p>
+      <p data-i18n="s08.q">Эксперт — как профессор. Нельзя взять и стать экспертом. Экспертиза — это опыт, годы и пройденный путь.</p>
     </blockquote>
   </div>
 </section>
 
 <!-- ═══ 09 ═══════════════════════════════════════════ -->
-<section id="s09" class="sec sec-last" data-num="09" data-title="Связь">
+<section id="s09" class="sec sec-last" data-num="09" data-title-key="s09.name">
   <div class="wrap">
     <header class="sec-head">
-      <p class="tag">Лист 09</p>
-      <h2>Связь</h2>
+      <p class="tag"><span data-i18n="sheet.c">Лист</span> 09</p>
+      <h2 data-i18n="s09.name">Связь</h2>
     </header>
 
-    <p class="contact-lead">
+    <p class="contact-lead" data-i18n="s09.lead">
       Если вы собственник и упёрлись в потолок ручного управления —
       напишите, разберёмся. Пишите сразу по делу: что за бизнес,
       где именно встало, что уже пробовали.
@@ -463,36 +501,36 @@
       <li>
         <span class="ch-k">Telegram</span>
         <a class="ch-v" href="https://t.me/remesloSEG" target="_blank" rel="me noopener">@remesloSEG</a>
-        <span class="ch-n">разборы, методики, текстовые материалы</span>
+        <span class="ch-n" data-i18n="c1">разборы, методики, текстовые материалы</span>
       </li>
       <li>
         <span class="ch-k">Instagram</span>
         <a class="ch-v" href="https://www.instagram.com/naropogosyan/" target="_blank" rel="me noopener">@naropogosyan</a>
-        <span class="ch-n">короткие разборы и кадры с объектов</span>
+        <span class="ch-n" data-i18n="c2">короткие разборы и кадры с объектов</span>
       </li>
       <li>
         <span class="ch-k">YouTube</span>
         <a class="ch-v" href="https://www.youtube.com/@GK-REMESLO" target="_blank" rel="noopener">@GK-REMESLO</a>
-        <span class="ch-n">ГК «Ремесло»: объекты, стройка, кейсы компании</span>
+        <span class="ch-n" data-i18n="c3">ГК «Ремесло»: объекты, стройка, кейсы компании</span>
       </li>
       <li>
         <span class="ch-k">YouTube</span>
         <a class="ch-v" href="https://www.youtube.com/@gpt-remeslo" target="_blank" rel="noopener">@gpt-remeslo</a>
-        <span class="ch-n">ИИ, CRM и автоматизация продаж</span>
+        <span class="ch-n" data-i18n="c4">ИИ, CRM и автоматизация продаж</span>
       </li>
       <li>
         <span class="ch-k">Rutube</span>
-        <a class="ch-v" href="https://rutube.ru/channel/44218981/" target="_blank" rel="noopener">Канал</a>
-        <span class="ch-n">то же видео для тех, кому так удобнее</span>
+        <a class="ch-v" href="https://rutube.ru/channel/44218981/" target="_blank" rel="noopener" data-i18n="c5v">Канал</a>
+        <span class="ch-n" data-i18n="c5">то же видео для тех, кому так удобнее</span>
       </li>
       <li>
-        <span class="ch-k">Выступления</span>
-        <a class="ch-v" href="https://t.me/remesloSEG" target="_blank" rel="noopener">Запрос в Telegram</a>
-        <span class="ch-n">темы и форматы — лист 07</span>
+        <span class="ch-k" data-i18n="s07.name">Выступления</span>
+        <a class="ch-v" href="https://t.me/remesloSEG" target="_blank" rel="noopener" data-i18n="c6v">Запрос в Telegram</a>
+        <span class="ch-n" data-i18n="c6">темы и форматы — лист 07</span>
       </li>
     </ul>
 
-    <div class="dim dim-end" role="presentation"><span>конец документа</span></div>
+    <div class="dim dim-end" role="presentation"><span data-i18n="end">конец документа</span></div>
   </div>
 </section>
 
@@ -501,14 +539,15 @@
 <footer class="foot">
   <div class="wrap">
     <div class="foot-grid">
-      <p><span>Документ</span>Нарек Погосян · личный сайт</p>
-      <p><span>Разделов</span>09</p>
-      <p><span>Масштаб</span>1:1</p>
-      <p><span>Редакция</span>2026</p>
+      <p><span data-i18n="ft1">Документ</span><b data-i18n="ft1v">Нарек Погосян · личный сайт</b></p>
+      <p><span data-i18n="ft2">Разделов</span><b>09</b></p>
+      <p><span data-i18n="ft3">Масштаб</span><b>1:1</b></p>
+      <p><span data-i18n="ft4">Редакция</span><b>2026</b></p>
     </div>
   </div>
 </footer>
 
+<script src="js/i18n.js" defer></script>
 <script src="js/main.js" defer></script>
 </body>
 </html>

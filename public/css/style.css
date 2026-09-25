@@ -212,18 +212,52 @@ a { color: inherit; }
 .st-sheet { border-right: 1px solid var(--rule); flex: none; }
 .st-sheet b { color: var(--accent); font-weight: 500; }
 .st-title { flex: 1 1 auto; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.st-theme {
-  flex: none; border: 0; border-left: 1px solid var(--rule);
-  background: transparent; color: var(--ink-2); cursor: pointer;
-  font: inherit; font-size: 9.5px; letter-spacing: .09em;
-  text-transform: lowercase;
-}
-.st-theme:hover { color: var(--accent); }
 
 @media (min-width: 1061px) {
   :root { --stamp-reserve: var(--stamp-w); }
   .stamp { left: auto; width: var(--stamp-w); }
   .st-name { display: flex; }
+}
+
+/* --- 5a. Язык и тема ------------------------------------------------------ */
+
+/* Правый верхний угол листа — поле примечаний. Блок появляется только
+   при рабочем JS: без него кнопки ничего бы не делали. */
+.ctl {
+  position: fixed; z-index: 8;
+  top: calc(clamp(9px, 1.4vw, 18px) + 1px);
+  right: calc(clamp(9px, 1.4vw, 18px) + 1px);
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+}
+.ctl[hidden] { display: none; }
+.ctl-set { display: flex; }
+.ctl-set + .ctl-set { border-left: 1px solid var(--rule); }
+.ctl-b {
+  -webkit-appearance: none; appearance: none;
+  border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 11px; letter-spacing: .1em;
+  color: var(--ink-3);
+  padding: 10px 12px; min-height: 36px;   /* палец попадает без прицеливания */
+  transition: color .15s;
+}
+.ctl-b + .ctl-b { border-left: 1px solid var(--rule-soft); }
+.ctl-b:hover { color: var(--ink); }
+.ctl-b[aria-pressed="true"] { color: var(--accent); }
+/* Активный пункт подчёркнут — цвет не единственный признак выбора. */
+.ctl-b[aria-pressed="true"]::after {
+  content: ""; display: block; height: 1px; margin-top: 3px;
+  background: currentColor;
+}
+.ctl-b[aria-pressed="false"]::after {
+  content: ""; display: block; height: 1px; margin-top: 3px;
+  background: transparent;
+}
+
+@media (max-width: 420px) {
+  .ctl-b { padding: 10px 9px; font-size: 10.5px; letter-spacing: .06em; }
 }
 
 /* --- 6. Сетка страницы --------------------------------------------------- */
@@ -753,3 +787,58 @@ a.ch-v:hover { border-bottom-color: var(--accent); }
 }
 .foot-grid p { display: flex; gap: 10px; }
 .foot-grid span { color: var(--ink-3); text-transform: uppercase; letter-spacing: .2em; }
+
+/* --- 22. Короткие экраны -------------------------------------------------- */
+
+/* Телефон в ландшафте: высоты мало, вертикальные отступы съедают экран. */
+@media (max-height: 520px) and (min-width: 480px) {
+  .sec-cover { min-height: 0; padding-top: 72px; padding-bottom: 60px; }
+  .sec { padding-block: 56px; }
+  .name { font-size: clamp(2.4rem, 7vw, 5rem); }
+  .cover-top { grid-template-columns: minmax(0, 1fr) clamp(110px, 18%, 180px); }
+  .facts dd b { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+}
+
+/* --- 23. Печать ----------------------------------------------------------- */
+
+/* На бумаге лист становится обычным документом: без рамки, штампа,
+   корешка и кнопок, всё содержимое реестра раскрыто. */
+@media print {
+  :root {
+    --paper: #fff; --paper-2: #fff;
+    --ink: #000; --ink-2: #222; --ink-3: #444;
+    --accent: #000;
+    --rule: #999; --rule-soft: #ccc; --grid: transparent; --faint: #999;
+    --gut: 0; --rail: 0; --stamp-reserve: 0;
+  }
+  .sheet-frame, .rail, .stamp, .ctl, .skip, .ticker { display: none !important; }
+
+  body {
+    background: #fff !important; background-image: none !important;
+    padding-bottom: 0; font-size: 10.5pt; line-height: 1.45;
+  }
+  .wrap { max-width: none; padding: 0; }
+
+  .sec { padding-block: 0 18pt; break-inside: auto; }
+  .sec + .sec::before { display: none; }
+  .sec-cover { min-height: 0; padding-top: 0; cursor: auto; }
+  .sec-head, .cover-top { break-after: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+
+  .name { font-size: 34pt; }
+  .cover-top { grid-template-columns: 1fr 120pt; }
+  .portrait img { filter: grayscale(1); }
+  .sec-head h2 { font-size: 18pt; }
+  .prose-lead, .lede, .contact-lead { font-size: 12pt; }
+
+  /* Реестр печатается раскрытым — иначе на бумаге останутся одни заголовки. */
+  .reg-row > summary { cursor: auto; }
+  .reg-row .r-n::after { content: ""; }
+  .reg-body { display: block !important; }
+  .reg-row, .steps li, .topics li, .chan li, .ved tr { break-inside: avoid; }
+
+  /* Адрес ссылки рядом с текстом — на бумаге кликнуть нельзя. */
+  .chan a::after { content: " (" attr(href) ")"; font-size: 8pt; color: #555; word-break: break-all; }
+
+  .foot { border-top: 1px solid #999; }
+}
